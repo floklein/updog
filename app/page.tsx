@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
+import { Camera, Search, RotateCcw, RefreshCw } from "lucide-react";
 
 type AppState = "idle" | "preview" | "loading" | "result";
 
@@ -139,9 +140,10 @@ export default function Home() {
           {/* Try again button */}
           <button
             onClick={handleReset}
-            className="w-full rounded-2xl bg-amber-600 px-6 py-3.5 font-semibold text-white shadow-lg transition-all hover:bg-amber-700 active:scale-95 dark:bg-amber-500 dark:hover:bg-amber-600"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-600 px-6 py-3.5 font-semibold text-white shadow-lg transition-all hover:bg-amber-700 active:scale-95 dark:bg-amber-500 dark:hover:bg-amber-600"
           >
-            🔄 Try Again
+            <RefreshCw className="h-[18px] w-[18px]" strokeWidth={2.5} />
+            Try again
           </button>
         </div>
       </div>
@@ -177,9 +179,10 @@ export default function Home() {
             <div className="text-8xl">🐶</div>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="rounded-2xl bg-amber-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:bg-amber-700 hover:shadow-xl active:scale-95 dark:bg-amber-500 dark:hover:bg-amber-600"
+              className="flex items-center gap-2 rounded-2xl bg-amber-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:bg-amber-700 hover:shadow-xl active:scale-95 dark:bg-amber-500 dark:hover:bg-amber-600"
             >
-              📸 Take a Selfie
+              <Camera className="h-[18px] w-[18px]" strokeWidth={2.5} />
+              Take a selfie
             </button>
             <p className="text-sm text-amber-600/70 dark:text-amber-400/70">
               We&apos;ll match you with your dog breed twin
@@ -205,15 +208,17 @@ export default function Home() {
             <div className="flex w-full gap-3">
               <button
                 onClick={handleReset}
-                className="flex-1 rounded-2xl border-2 border-amber-300 px-6 py-3.5 font-semibold text-amber-800 transition-all hover:bg-amber-100 active:scale-95 dark:border-amber-700 dark:text-amber-200 dark:hover:bg-amber-900/30"
+                className="flex flex-1 items-center justify-center gap-2 rounded-2xl border-2 border-amber-300 px-6 py-3.5 font-semibold text-amber-800 transition-all hover:bg-amber-100 active:scale-95 dark:border-amber-700 dark:text-amber-200 dark:hover:bg-amber-900/30"
               >
+                <RotateCcw className="h-[18px] w-[18px]" strokeWidth={2.5} />
                 Retake
               </button>
               <button
                 onClick={handleAnalyze}
-                className="flex-1 rounded-2xl bg-amber-600 px-6 py-3.5 font-semibold text-white shadow-lg transition-all hover:bg-amber-700 hover:shadow-xl active:scale-95 dark:bg-amber-500 dark:hover:bg-amber-600"
+                className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-amber-600 px-6 py-3.5 font-semibold text-white shadow-lg transition-all hover:bg-amber-700 hover:shadow-xl active:scale-95 dark:bg-amber-500 dark:hover:bg-amber-600"
               >
-                🐕 Find My Breed!
+                <Search className="h-[18px] w-[18px]" strokeWidth={2.5} />
+                Find my breed!
               </button>
             </div>
           </div>

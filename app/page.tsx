@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { Camera, Search, RotateCcw, RefreshCw } from "lucide-react";
+import { Camera, RotateCcw, RefreshCw } from "lucide-react";
 
 type AppState = "idle" | "preview" | "loading" | "result";
+type AnimalMode = "dog" | "cat";
 
 interface BreedResult {
   breed: string;
@@ -11,10 +12,10 @@ interface BreedResult {
   similarityReason: string;
   funFact: string;
   matchPercentage: number;
-  dogImageUrl: string | null;
+  animalImageUrl: string | null;
 }
 
-const LOADING_MESSAGES = [
+const DOG_LOADING_MESSAGES = [
   "Sniffing out your breed...",
   "Checking the dog park database...",
   "Comparing nose boops...",
@@ -22,14 +23,21 @@ const LOADING_MESSAGES = [
   "Analyzing your inner puppy...",
 ];
 
+const CAT_LOADING_MESSAGES = [
+  "Consulting the cat council...",
+  "Checking the litter-ature...",
+  "Analyzing your inner feline...",
+  "Decoding your mysterious aura...",
+  "Asking the cats (they may not answer)...",
+];
+
 export default function Home() {
   const [state, setState] = useState<AppState>("idle");
+  const [animalMode, setAnimalMode] = useState<AnimalMode>("dog");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [result, setResult] = useState<BreedResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loadingMessage] = useState(
-    () => LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)]
-  );
+  const [loadingMessage, setLoadingMessage] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = useCallback(
@@ -48,28 +56,38 @@ export default function Home() {
     []
   );
 
-  const handleAnalyze = useCallback(async () => {
-    if (!imageUrl) return;
-    setState("loading");
-    setError(null);
+  const handleAnalyze = useCallback(
+    async (mode: AnimalMode) => {
+      if (!imageUrl) return;
+      setAnimalMode(mode);
+      setState("loading");
+      setError(null);
 
-    try {
-      const res = await fetch("/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: imageUrl }),
-      });
+      const messages =
+        mode === "cat" ? CAT_LOADING_MESSAGES : DOG_LOADING_MESSAGES;
+      setLoadingMessage(
+        messages[Math.floor(Math.random() * messages.length)]
+      );
 
-      if (!res.ok) throw new Error("Analysis failed");
+      try {
+        const res = await fetch("/api/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: imageUrl, mode }),
+        });
 
-      const data: BreedResult = await res.json();
-      setResult(data);
-      setState("result");
-    } catch {
-      setError("Something went wrong. Please try again!");
-      setState("preview");
-    }
-  }, [imageUrl]);
+        if (!res.ok) throw new Error("Analysis failed");
+
+        const data: BreedResult = await res.json();
+        setResult(data);
+        setState("result");
+      } catch {
+        setError("Something went wrong. Please try again!");
+        setState("preview");
+      }
+    },
+    [imageUrl]
+  );
 
   const handleReset = useCallback(() => {
     setState("idle");
@@ -83,11 +101,11 @@ export default function Home() {
   if (state === "result" && result && imageUrl) {
     return (
       <div className="flex h-dvh flex-col overflow-hidden bg-gradient-to-b from-amber-50 to-orange-100 font-[family-name:var(--font-geist-sans)] dark:from-zinc-950 dark:to-zinc-900">
-        {/* Dog image - top section */}
+        {/* Animal image - top section */}
         <div className="relative min-h-0 flex-1">
-          {result.dogImageUrl ? (
+          {result.animalImageUrl ? (
             <img
-              src={result.dogImageUrl}
+              src={result.animalImageUrl}
               alt={result.breed}
               className="h-full w-full object-cover"
             />
@@ -129,7 +147,7 @@ export default function Home() {
             {/* Fun fact */}
             <div className="rounded-2xl bg-amber-50 p-3 dark:bg-zinc-700/50">
               <p className="text-xs font-semibold text-amber-800 dark:text-amber-300">
-                🦴 Fun Fact
+                {animalMode === "cat" ? "🐟" : "🦴"} Fun Fact
               </p>
               <p className="mt-0.5 text-xs leading-relaxed text-amber-700 dark:text-amber-200/80">
                 {result.funFact}
@@ -159,7 +177,7 @@ export default function Home() {
             Updog
           </h1>
           <p className="mt-2 text-lg text-amber-700 dark:text-amber-300">
-            Find out which dog breed you look like!
+            Find your breed twin!
           </p>
         </header>
 
@@ -176,7 +194,7 @@ export default function Home() {
         {/* Idle state */}
         {state === "idle" && (
           <div className="flex flex-col items-center gap-6">
-            <div className="text-8xl">🐶</div>
+            <div className="text-8xl">🐶🐱</div>
             <button
               onClick={() => fileInputRef.current?.click()}
               className="flex items-center gap-2 rounded-2xl bg-amber-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:bg-amber-700 hover:shadow-xl active:scale-95 dark:bg-amber-500 dark:hover:bg-amber-600"
@@ -185,7 +203,7 @@ export default function Home() {
               Take a selfie
             </button>
             <p className="text-sm text-amber-600/70 dark:text-amber-400/70">
-              We&apos;ll match you with your dog breed twin
+              We&apos;ll match you with your breed twin
             </p>
           </div>
         )}
@@ -208,17 +226,21 @@ export default function Home() {
             <div className="flex w-full gap-3">
               <button
                 onClick={handleReset}
-                className="flex flex-1 items-center justify-center gap-2 rounded-2xl border-2 border-amber-300 px-6 py-3.5 font-semibold text-amber-800 transition-all hover:bg-amber-100 active:scale-95 dark:border-amber-700 dark:text-amber-200 dark:hover:bg-amber-900/30"
+                className="flex items-center justify-center gap-2 rounded-2xl border-2 border-amber-300 px-5 py-3.5 font-semibold text-amber-800 transition-all hover:bg-amber-100 active:scale-95 dark:border-amber-700 dark:text-amber-200 dark:hover:bg-amber-900/30"
               >
                 <RotateCcw className="h-[18px] w-[18px]" strokeWidth={2.5} />
-                Retake
               </button>
               <button
-                onClick={handleAnalyze}
+                onClick={() => handleAnalyze("dog")}
                 className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-amber-600 px-6 py-3.5 font-semibold text-white shadow-lg transition-all hover:bg-amber-700 hover:shadow-xl active:scale-95 dark:bg-amber-500 dark:hover:bg-amber-600"
               >
-                <Search className="h-[18px] w-[18px]" strokeWidth={2.5} />
-                Find my breed!
+                🐶 Dog breed
+              </button>
+              <button
+                onClick={() => handleAnalyze("cat")}
+                className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-amber-600 px-6 py-3.5 font-semibold text-white shadow-lg transition-all hover:bg-amber-700 hover:shadow-xl active:scale-95 dark:bg-amber-500 dark:hover:bg-amber-600"
+              >
+                🐱 Cat breed
               </button>
             </div>
           </div>

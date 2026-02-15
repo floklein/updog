@@ -26,5 +26,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Fonts**: Geist Sans and Geist Mono loaded via `next/font` with CSS variables
 - **Path alias**: `@/*` maps to the project root
 - **AI Integration**: API route at `app/api/analyze/route.ts` uses `generateObject()` with Google Gemini 2.5 Flash via Vercel AI Gateway (model string: `google/gemini-2.5-flash`)
-- **Dog Images**: Fetched from the Dog CEO API (`dog.ceo`) with server-side fuzzy breed name matching
+- **Animal Images**: Dog images from Dog CEO API (`dog.ceo`), cat images from TheCatAPI (`api.thecatapi.com`), both with server-side fuzzy breed name matching
+- **Dog/Cat Mode**: User chooses dog or cat breed matching after taking a selfie; mode flows through to API which uses animal-specific AI prompts and image sources
 - **Environment**: `AI_GATEWAY_API_KEY` in `.env.local` (gitignored)
